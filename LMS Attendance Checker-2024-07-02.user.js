@@ -1,41 +1,50 @@
 // ==UserScript==
 // @name         LMS Attendance Checker
 // @namespace    http://tampermonkey.net/
-// @version      0.1 beta
+// @version      0.1
 // @description  LMSのマイコース上に出席カウント，後何回休めるのかがわかるダッシュボードを表示します．
 // @author       nihsukah
 // @match        https://lms-tokyo.iput.ac.jp/my/courses.php
-// @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=lms-tokyo.iput.ac.jp
 // @grant        none
 // ==/UserScript==
 
 (function() {
-    'use strict';
+    "use strict";
 
-    // ウインドウのスタイルを設定する
-    const windowStyle = `
-        position: fixed;
-        top: 50px;
-        right: 50px;
-        width: 300px;
-        height: 200px;
-        background: white;
-        border: 1px solid black;
-        padding: 10px;
-        z-index: 1000;
-    `;
+    function createWindow() {
+    // ウインドウの要素を作成
+    const windowDiv = document.createElement("div");
+    windowDiv.style.position = "absolute";
+    windowDiv.style.top = "10px";
+    windowDiv.style.right = "50%";
+    windowDiv.style.width = "400px";
+    windowDiv.style.height = "300px";
+    windowDiv.style.border = "2px solid #ccc";
+    windowDiv.style.backgroundColor = "#fff";
+    windowDiv.style.zIndex = "1000";
+    windowDiv.style.padding = "10px";
+    windowDiv.style.boxShadow = "0px 0px 10px rgba(0, 0, 0, 0.1)";
+    windowDiv.style.opacity = "0.8"
 
-    // ウインドウのHTMLを生成する
-    const attendanceWindow = document.createElement('div');
-    attendanceWindow.setAttribute('style', windowStyle);
-    attendanceWindow.innerHTML = `
-        <h3>出席回数記録</h3>
-        <label for="attendanceCount">出席回数:</label>
-        <input type="number" id="attendanceCount" min="0" value="0" style="width: 50px;">
-        <button id="saveAttendance">保存</button>
-        <button id="closeWindow">閉じる</button>
-    `;
+        // タイトル
+        const title = document.createElement("h3");
+        title.innerText = "Dashboard";
+        windowDiv.appendChild(title);
 
-    // ウインドウをページに追加する
-    document.body.appendChild(attendanceWindow);
+        // 内容
+        const content = document.createElement("div");
+        content.innerText = "テスト！";
+        windowDiv.appendChild(content);
+
+        // ドキュメントに追加する
+        document.body.appendChild(windowDiv);
+    }
+
+    // ページ読み込み後にウインドウ生成
+    window.addEventListener("load", function() {
+        // 1秒待つ
+        this.setTimeout(createWindow, 1000);
+    });
+
 })();
