@@ -8,7 +8,7 @@
  
 以上の3つが確認できるダッシュボードを追加するUserScriptです．
 
-## 使用方法
+## セットアップ
 本スクリプトを使用するにあたって，[Tampermonkey](https://chromewebstore.google.com/detail/dhdgffkkebhmkfjojejmpbldmpobfkfo)という拡張機能が必要になります．<br>
 青色のリンク先から拡張機能をダウンロードして下さい．<br>
 ![image](https://github.com/SoraMineg/lms/assets/103377853/b0390e3c-73fe-429e-8398-e24bd8cd6f45)
@@ -21,4 +21,3 @@
 
 左上に記載してあるタイトルが **"LMS: Simple Dashboard"** と表示されていれば準備は完了です．お疲れ様でした．
 ![image](https://github.com/SoraMineg/lms/assets/103377853/1915bc11-a884-4383-8adc-ebdcdbba5f21)
-
