@@ -11,28 +11,38 @@
 
 (function() {
     "use strict";
+    // 開いているウインドウの状態を保持する
+    let currentlyOpenWindow = null;
 
     function createWindowForCourse(course) {
         // ウインドウの要素を作成
         const windowDiv = document.createElement("div");
         windowDiv.style.position = "absolute";
-        windowDiv.style.width = "800px";
+        windowDiv.style.width = "500px";
         windowDiv.style.height = "300px";
-        windowDiv.style.border = "2px solid #ccc";
-        windowDiv.style.backgroundColor = "#fff";
+        windowDiv.style.border = "none";
+        windowDiv.style.borderRadius = "10px";
+        windowDiv.style.backgroundColor = "#f9f9f9";
         windowDiv.style.zIndex = "1000";
-        windowDiv.style.padding = "10px";
-        windowDiv.style.boxShadow = "0px 0px 10px rgba(0, 0, 0, 0.1)";
+        windowDiv.style.padding = "20px";
+        windowDiv.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.1)";
         windowDiv.style.opacity = "0.95";
         windowDiv.style.overflowY = "auto";
 
         // タイトル
         const title = document.createElement("h3");
         title.innerText = "Dashboard";
+        title.style.marginBottom = "20px";
+        title.style.fontFamily = "'Meiryo', メイリオ";
+        title.style.fontSize = "24px";
+        title.style.color = "#333";
         windowDiv.appendChild(title);
 
         // 内容を置き換える
         const content = document.createElement("div");
+        content.style.fontFamily = "'Meiryo', メイリオ";
+        content.style.fontSize = "16px";
+        content.style.color = "#666";
         windowDiv.appendChild(content);
 
         // コースカードの右に配置
@@ -147,19 +157,29 @@
                 // ボタンをクリックしたときにウィンドウを表示
                 const dashboardWindow = createWindowForCourse(course);
                 viewButton.addEventListener("click", async function() {
+                    // ウインドウが既に開かれている場合は削除する
+                    if (currentlyOpenWindow && currentlyOpenWindow !== dashboardWindow) {
+                        currentlyOpenWindow.style.display = "none";
+                    }
+
                     if (dashboardWindow.style.display === "none") {
                         const courseLink = course.querySelector(".aalink.coursename").href;
                         const courseInfo = await fetchCourseInfo(courseLink);
                         dashboardWindow.querySelector("div").innerHTML = courseInfo;
                         dashboardWindow.style.display = "block";
+                        // 現在のウインドウ状態を更新する
+                        currentlyOpenWindow = dashboardWindow;
                     } else {
                         dashboardWindow.style.display = "none";
+                        // ウインドウを閉じる
+                        currentlyOpenWindow = null;
                     }
                 });
 
                 // コースカードにボタンを追加
                 course.appendChild(viewButton);
             });
+        // ページローディング2秒後に生成
         }, 2000);
     });
 
