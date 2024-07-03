@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         LMS-Simple-Dashboard
+// @name         LMS Simple Dashboard
 // @namespace    http://tampermonkey.net/
 // @version      0.1
 // @description  LMSのマイコース上に出席カウント，後何回休めるのかがわかるダッシュボードを表示します．
@@ -23,7 +23,7 @@
         windowDiv.style.zIndex = "1000";
         windowDiv.style.padding = "10px";
         windowDiv.style.boxShadow = "0px 0px 10px rgba(0, 0, 0, 0.1)";
-        windowDiv.style.opacity = "0.8";
+        windowDiv.style.opacity = "0.95";
         windowDiv.style.overflowY = "auto";
 
         // タイトル
@@ -49,11 +49,62 @@
         return windowDiv;
     }
 
+    async function fetchAttendanceCount(attendanceLink) {
+        try {
+            const response = await fetch(attendanceLink);
+            const text = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, "text/html");
+            const attendanceCells = doc.querySelectorAll('td.statuscol.cell.c2');
+
+            // "出席" のカウント
+            const attendanceCount = Array.from(attendanceCells).filter(td => td.textContent.includes("出席")).length;
+
+            // "遅刻" のカウント
+            const tardyCount = Array.from(attendanceCells).filter(td => td.textContent.includes("遅刻")).length;
+
+            // "欠席" のカウント（"今後の欠席を報告する"を除外）
+            const absentCount = Array.from(attendanceCells).filter(td => {
+                return td.textContent.includes("欠席") && !td.textContent.includes("今後の欠席を報告する");
+            }).length;
+
+            return { attendanceCount, tardyCount, absentCount };
+        } catch (error) {
+            console.error("Failed to fetch attendance information:", error);
+            return { attendanceCount: 0, tardyCount: 0, absentCount: 0 };
+        }
+    }
+
     async function fetchCourseInfo(courseLink) {
         try {
             const response = await fetch(courseLink);
             const text = await response.text();
-            return text;
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, "text/html");
+
+            // <div class="snap-assettype">出欠</div> の要素を見つける
+            const attendanceDivs = doc.querySelectorAll('div.snap-assettype');
+            let attendanceLink = null;
+
+            for (let div of attendanceDivs) {
+                if (div.textContent.trim() === "出欠") {
+                    const modLink = div.closest('.activityinstance').querySelector('a.mod-link');
+                    if (modLink) {
+                        attendanceLink = modLink.href + "&view=5";
+                        break;
+                    }
+                }
+            }
+
+            // リンクが見つかった場合、そのリンクから出席数、遅刻数、欠席数をカウント
+            if (attendanceLink) {
+                const { attendanceCount, tardyCount, absentCount } = await fetchAttendanceCount(attendanceLink);
+                return `<p>出席の数: ${attendanceCount}</p>
+                        <p>遅刻の数: ${tardyCount}</p>
+                        <p>欠席の数: ${absentCount}</p>`;
+            } else {
+                return "出欠リンクが見つかりませんでした。";
+            }
         } catch (error) {
             console.error("Failed to fetch course information:", error);
             return "Failed to load course information.";
@@ -64,6 +115,11 @@
     window.addEventListener("load", function() {
         setTimeout(function() {
             const courses = document.querySelectorAll(".card.dashboard-card");
+            if (courses.length === 0) {
+                console.error("No courses found. Please check the DOM structure.");
+                return;
+            }
+
             courses.forEach(course => {
                 // "View Dashboard" ボタンを作成
                 const viewButton = document.createElement("button");
@@ -73,18 +129,19 @@
                 viewButton.style.padding = "10px 20px";
                 viewButton.style.border = "none";
                 viewButton.style.borderRadius = "5px";
-                viewButton.style.backgroundColor = "#007bff";
+                viewButton.style.backgroundColor = "#007BBB";
                 viewButton.style.color = "#fff";
                 viewButton.style.cursor = "pointer";
-                viewButton.style.fontSize = "14px";
+                viewButton.style.fontFamily = "'Meiryo', メイリオ";
+                viewButton.style.fontSize = "15px";
                 viewButton.style.transition = "background-color 0.3s ease";
 
                 viewButton.addEventListener("mouseover", function() {
-                    viewButton.style.backgroundColor = "#0056b3";
+                    viewButton.style.backgroundColor = "#005f8c";
                 });
 
                 viewButton.addEventListener("mouseout", function() {
-                    viewButton.style.backgroundColor = "#007bff";
+                    viewButton.style.backgroundColor = "#007BBB";
                 });
 
                 // ボタンをクリックしたときにウィンドウを表示
@@ -93,7 +150,7 @@
                     if (dashboardWindow.style.display === "none") {
                         const courseLink = course.querySelector(".aalink.coursename").href;
                         const courseInfo = await fetchCourseInfo(courseLink);
-                        dashboardWindow.querySelector("div").innerText = courseInfo;
+                        dashboardWindow.querySelector("div").innerHTML = courseInfo;
                         dashboardWindow.style.display = "block";
                     } else {
                         dashboardWindow.style.display = "none";
@@ -103,7 +160,7 @@
                 // コースカードにボタンを追加
                 course.appendChild(viewButton);
             });
-        }, 1000);
+        }, 2000);
     });
 
 })();
