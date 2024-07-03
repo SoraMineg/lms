@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         LMS Simple Dashboard
+// @name         LMS-Simple-Dashboard
 // @namespace    http://tampermonkey.net/
 // @version      0.1
 // @description  LMSのマイコース上に出席カウント，後何回休めるのかがわかるダッシュボードを表示します．
