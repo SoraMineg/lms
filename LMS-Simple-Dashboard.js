@@ -107,17 +107,17 @@
                     <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px;">
                         <div style="flex: 1; background-color: #007BBB; color: white; padding: 10px; border-radius: 10px; text-align: start;">
                             <div style="padding-left: 10px; font-family: Arial; font-weight: bold;">Attendance</div>
-                            <div style="font-size: 35px; padding-left: 20px; font-family: Arial; font-weight: bold;">${attendanceCount}</div>
+                            <div style="font-size: 40px; padding-left: 20px; font-family: Arial; font-weight: bold;">${attendanceCount}</div>
                         </div>
                         <div style="flex: 1; background-color: #BBDEFB; color: #007BBB; padding: 10px; border-radius: 10px; text-align: start;">
                             <div style="padding-left: 10px; font-family: Arial; font-weight: bold;">Tardiness</div>
-                            <div style="font-size: 35px; padding-left: 20px; font-family: Arial; font-weight: bold;">${tardinessCount}</div>
+                            <div style="font-size: 40px; padding-left: 20px; font-family: Arial; font-weight: bold;">${tardinessCount}</div>
                         </div>
                     </div>
                     <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
                         <div style="flex: 1; background-color: #FFCDD2; color: red; padding: 10px; border-radius: 10px; text-align: start;">
                             <div style="padding-left: 10px; font-family: Arial; font-weight: bold;">Absent</div>
-                            <div style="font-size: 35px; padding-left: 20px; font-family: Arial; font-weight: bold;">${absentCount}</div>
+                            <div style="font-size: 40px; padding-left: 20px; font-family: Arial; font-weight: bold;">${absentCount}</div>
                         </div>
                     </div>
                 `;
