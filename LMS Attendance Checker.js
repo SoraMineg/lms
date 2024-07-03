@@ -33,11 +33,6 @@
 
         // 内容を置き換える
         const content = document.createElement("div");
-
-        // コースリンクを取得
-        const courseLink = course.querySelector(".aalink.coursename").href;
-        content.innerHTML = `<p>Course Link: <a href="${courseLink}" target="_blank">${courseLink}</a></p>`;
-
         windowDiv.appendChild(content);
 
         // コースカードの右に配置
@@ -52,6 +47,17 @@
         windowDiv.style.display = "none";
 
         return windowDiv;
+    }
+
+    async function fetchCourseInfo(courseLink) {
+        try {
+            const response = await fetch(courseLink);
+            const text = await response.text();
+            return text;
+        } catch (error) {
+            console.error("Failed to fetch course information:", error);
+            return "Failed to load course information.";
+        }
     }
 
     // ページ読み込み後に各コースカードに対してボタンとウィンドウを生成
@@ -83,8 +89,15 @@
 
                 // ボタンをクリックしたときにウィンドウを表示
                 const dashboardWindow = createWindowForCourse(course);
-                viewButton.addEventListener("click", function() {
-                    dashboardWindow.style.display = dashboardWindow.style.display === "none" ? "block" : "none";
+                viewButton.addEventListener("click", async function() {
+                    if (dashboardWindow.style.display === "none") {
+                        const courseLink = course.querySelector(".aalink.coursename").href;
+                        const courseInfo = await fetchCourseInfo(courseLink);
+                        dashboardWindow.querySelector("div").innerText = courseInfo;
+                        dashboardWindow.style.display = "block";
+                    } else {
+                        dashboardWindow.style.display = "none";
+                    }
                 });
 
                 // コースカードにボタンを追加
