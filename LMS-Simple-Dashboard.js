@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         LMS Simple Dashboard
+// @name         LMS: Simple Dashboard
 // @namespace    http://tampermonkey.net/
 // @version      0.1
-// @description  LMSのマイコース上に出席カウント，後何回休めるのかがわかるダッシュボードを表示します．
+// @description  LMSのマイコース上に出席，遅刻，欠席が一目でわかるダッシュボードを表示します．
 // @author       nihsukah
 // @match        https://lms-tokyo.iput.ac.jp/my/courses.php
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=lms-tokyo.iput.ac.jp
@@ -11,49 +11,50 @@
 
 (function() {
     "use strict";
-    // 開いているウインドウの状態を保持する
     let currentlyOpenWindow = null;
 
     function createWindowForCourse(course) {
-        // ウインドウの要素を作成
         const windowDiv = document.createElement("div");
         windowDiv.style.position = "absolute";
-        windowDiv.style.width = "500px";
-        windowDiv.style.height = "300px";
+        windowDiv.style.width = "400px";
         windowDiv.style.border = "none";
         windowDiv.style.borderRadius = "10px";
         windowDiv.style.backgroundColor = "#f9f9f9";
         windowDiv.style.zIndex = "1000";
         windowDiv.style.padding = "20px";
-        windowDiv.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.1)";
+        windowDiv.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.4)";
         windowDiv.style.opacity = "0.95";
         windowDiv.style.overflowY = "auto";
 
-        // タイトル
         const title = document.createElement("h3");
         title.innerText = "Dashboard";
         title.style.marginBottom = "20px";
         title.style.fontFamily = "'Meiryo', メイリオ";
         title.style.fontSize = "24px";
         title.style.color = "#333";
+        title.style.fontWeight = "bold";
+        title.style.borderBottom = "4px solid #ccc";
+        title.style.paddingBottom = "10px";
         windowDiv.appendChild(title);
 
-        // 内容を置き換える
         const content = document.createElement("div");
         content.style.fontFamily = "'Meiryo', メイリオ";
         content.style.fontSize = "16px";
         content.style.color = "#666";
         windowDiv.appendChild(content);
 
-        // コースカードの右に配置
         const rect = course.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+
         windowDiv.style.top = `${rect.top + window.scrollY}px`;
-        windowDiv.style.left = `${rect.right + window.scrollX + 10}px`; // コースカードの右に10pxの余白を追加
+        if (rect.right + 420 > viewportWidth) {
+            windowDiv.style.left = `${rect.left + window.scrollX - 420}px`;
+        } else {
+            windowDiv.style.left = `${rect.right + window.scrollX + 10}px`;
+        }
 
-        // ドキュメントに追加する
         document.body.appendChild(windowDiv);
-
-        // 初期状態では非表示
         windowDiv.style.display = "none";
 
         return windowDiv;
@@ -67,21 +68,16 @@
             const doc = parser.parseFromString(text, "text/html");
             const attendanceCells = doc.querySelectorAll('td.statuscol.cell.c2');
 
-            // "出席" のカウント
             const attendanceCount = Array.from(attendanceCells).filter(td => td.textContent.includes("出席")).length;
-
-            // "遅刻" のカウント
-            const tardyCount = Array.from(attendanceCells).filter(td => td.textContent.includes("遅刻")).length;
-
-            // "欠席" のカウント（"今後の欠席を報告する"を除外）
+            const tardinessCount = Array.from(attendanceCells).filter(td => td.textContent.includes("遅刻")).length;
             const absentCount = Array.from(attendanceCells).filter(td => {
                 return td.textContent.includes("欠席") && !td.textContent.includes("今後の欠席を報告する");
             }).length;
 
-            return { attendanceCount, tardyCount, absentCount };
+            return { attendanceCount, tardinessCount, absentCount };
         } catch (error) {
             console.error("Failed to fetch attendance information:", error);
-            return { attendanceCount: 0, tardyCount: 0, absentCount: 0 };
+            return { attendanceCount: 0, tardinessCount: 0, absentCount: 0 };
         }
     }
 
@@ -92,7 +88,6 @@
             const parser = new DOMParser();
             const doc = parser.parseFromString(text, "text/html");
 
-            // <div class="snap-assettype">出欠</div> の要素を見つける
             const attendanceDivs = doc.querySelectorAll('div.snap-assettype');
             let attendanceLink = null;
 
@@ -106,12 +101,26 @@
                 }
             }
 
-            // リンクが見つかった場合、そのリンクから出席数、遅刻数、欠席数をカウント
             if (attendanceLink) {
-                const { attendanceCount, tardyCount, absentCount } = await fetchAttendanceCount(attendanceLink);
-                return `<p>出席の数: ${attendanceCount}</p>
-                        <p>遅刻の数: ${tardyCount}</p>
-                        <p>欠席の数: ${absentCount}</p>`;
+                const { attendanceCount, tardinessCount, absentCount } = await fetchAttendanceCount(attendanceLink);
+                return `
+                    <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px;">
+                        <div style="flex: 1; background-color: #007BBB; color: white; padding: 10px; border-radius: 10px; text-align: start;">
+                            <div style="padding-left: 10px; font-family: Arial; font-weight: bold;">Attendance</div>
+                            <div style="font-size: 35px; padding-left: 20px; font-family: Arial; font-weight: bold;">${attendanceCount}</div>
+                        </div>
+                        <div style="flex: 1; background-color: #BBDEFB; color: #007BBB; padding: 10px; border-radius: 10px; text-align: start;">
+                            <div style="padding-left: 10px; font-family: Arial; font-weight: bold;">Tardiness</div>
+                            <div style="font-size: 35px; padding-left: 20px; font-family: Arial; font-weight: bold;">${tardinessCount}</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+                        <div style="flex: 1; background-color: #FFCDD2; color: red; padding: 10px; border-radius: 10px; text-align: start;">
+                            <div style="padding-left: 10px; font-family: Arial; font-weight: bold;">Absent</div>
+                            <div style="font-size: 35px; padding-left: 20px; font-family: Arial; font-weight: bold;">${absentCount}</div>
+                        </div>
+                    </div>
+                `;
             } else {
                 return "出欠リンクが見つかりませんでした。";
             }
@@ -121,7 +130,6 @@
         }
     }
 
-    // ページ読み込み後に各コースカードに対してボタンとウィンドウを生成
     window.addEventListener("load", function() {
         setTimeout(function() {
             const courses = document.querySelectorAll(".card.dashboard-card");
@@ -131,7 +139,6 @@
             }
 
             courses.forEach(course => {
-                // "View Dashboard" ボタンを作成
                 const viewButton = document.createElement("button");
                 viewButton.innerText = "View Dashboard";
                 viewButton.style.marginTop = "10px";
@@ -143,7 +150,7 @@
                 viewButton.style.color = "#fff";
                 viewButton.style.cursor = "pointer";
                 viewButton.style.fontFamily = "'Meiryo', メイリオ";
-                viewButton.style.fontSize = "15px";
+                viewButton.style.fontSize = "20px";
                 viewButton.style.transition = "background-color 0.3s ease";
 
                 viewButton.addEventListener("mouseover", function() {
@@ -154,10 +161,8 @@
                     viewButton.style.backgroundColor = "#007BBB";
                 });
 
-                // ボタンをクリックしたときにウィンドウを表示
                 const dashboardWindow = createWindowForCourse(course);
                 viewButton.addEventListener("click", async function() {
-                    // ウインドウが既に開かれている場合は削除する
                     if (currentlyOpenWindow && currentlyOpenWindow !== dashboardWindow) {
                         currentlyOpenWindow.style.display = "none";
                     }
@@ -166,21 +171,17 @@
                         const courseLink = course.querySelector(".aalink.coursename").href;
                         const courseInfo = await fetchCourseInfo(courseLink);
                         dashboardWindow.querySelector("div").innerHTML = courseInfo;
+                        dashboardWindow.style.height = 'auto';  // ウィンドウの高さを自動調整
                         dashboardWindow.style.display = "block";
-                        // 現在のウインドウ状態を更新する
                         currentlyOpenWindow = dashboardWindow;
                     } else {
                         dashboardWindow.style.display = "none";
-                        // ウインドウを閉じる
                         currentlyOpenWindow = null;
                     }
                 });
 
-                // コースカードにボタンを追加
                 course.appendChild(viewButton);
             });
-        // ページローディング2秒後に生成
         }, 2000);
     });
-
 })();
