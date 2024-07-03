@@ -16,5 +16,5 @@
 ダウンロードが出来たら，右上の顔(？)のような黒いアイコンをクリックし，**"Create a new script..."** をクリックして下さい．<br>
 ![image](https://github.com/SoraMineg/lms/assets/103377853/60665e57-b370-473b-996b-62d89ab1d906)
 
-すると画像のような画面になるはずです．ここに
+すると画像のような画面になるはずです．最初からあるデモコードを**全て**削除し，
 ![image](https://github.com/SoraMineg/lms/assets/103377853/fdd7d9bc-8897-4aef-893e-6fc67829751f)
