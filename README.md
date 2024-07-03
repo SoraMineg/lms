@@ -16,5 +16,9 @@
 ダウンロードが出来たら，右上の顔(？)のような黒いアイコンをクリックし，**"Create a new script..."** をクリックして下さい．<br>
 ![image](https://github.com/SoraMineg/lms/assets/103377853/60665e57-b370-473b-996b-62d89ab1d906)
 
-すると画像のような画面になるはずです．最初からあるデモコードを**全て削除**し，[LMS-Simple-Dashboard.js]()の内容を全てコピペして下さい．
+すると画像のような画面になるはずです．最初からあるデモコードを**全て削除**し，[LMS-Simple-Dashboard.js](https://github.com/SoraMineg/lms/blob/main/LMS-Simple-Dashboard.js)の内容を全てコピペして下さい．
 ![image](https://github.com/SoraMineg/lms/assets/103377853/fdd7d9bc-8897-4aef-893e-6fc67829751f)
+
+左上に記載してあるタイトルが **"LMS: Simple Dashboard"** と表示されていれば準備は完了です．お疲れ様でした．
+![image](https://github.com/SoraMineg/lms/assets/103377853/1915bc11-a884-4383-8adc-ebdcdbba5f21)
+
