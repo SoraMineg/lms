@@ -13,7 +13,7 @@
 青色のリンク先から拡張機能をダウンロードして下さい．<br>
 ![image](https://github.com/SoraMineg/lms/assets/103377853/b0390e3c-73fe-429e-8398-e24bd8cd6f45)
 
-ダウンロードが出来たら，右上の顔(？)のような黒いアイコンをクリックし，**"Create a new script..."** をクリックして下さい．<br>
+ダウンロードが出来たら，右上の顔(？)のような黒いアイコンをクリックし，**"Create a new script..."** を選択して下さい．<br>
 ![image](https://github.com/SoraMineg/lms/assets/103377853/60665e57-b370-473b-996b-62d89ab1d906)
 
 すると画像のような画面になるはずです．最初からあるデモコードを**全て削除**し，[LMS-Simple-Dashboard.js](https://github.com/SoraMineg/lms/blob/main/LMS-Simple-Dashboard.js)の内容を全てコピペして下さい．
