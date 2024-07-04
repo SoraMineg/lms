@@ -6,7 +6,7 @@
  - **遅刻 (Tardiness)**
  - **欠席 (Absent)** <br>
  
-以上の3つが確認できるダッシュボードを追加するUserScriptです．
+以上3つの数値が確認できるダッシュボードを追加するUserScriptです．
 
 ## セットアップ
 本スクリプトを使用するにあたって，[Tampermonkey](https://chromewebstore.google.com/detail/dhdgffkkebhmkfjojejmpbldmpobfkfo)という拡張機能が必要になります．<br>
