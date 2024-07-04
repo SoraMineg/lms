@@ -72,19 +72,19 @@
             const attendanceCells = doc.querySelectorAll('td.statuscol.cell.c2');
 
             const attendanceCount = Array.from(attendanceCells).filter(td => td.textContent.includes("出席")).length;
-            let tardinessCount = Array.from(attendanceCells).filter(td => td.textContent.includes("遅刻")).length;
+            let lateCount = Array.from(attendanceCells).filter(td => td.textContent.includes("遅刻")).length;
             let absentCount = Array.from(attendanceCells).filter(td => {
                 return td.textContent.includes("欠席") && !td.textContent.includes("今後の欠席を報告する");
             }).length;
 
             // 遅刻3回を欠席1回に換算
-            absentCount += Math.floor(tardinessCount / 3);
-            tardinessCount = tardinessCount % 3;
+            absentCount += Math.floor(lateCount / 3);
+            lateCount = lateCount % 3;
 
-            return { attendanceCount, tardinessCount, absentCount };
+            return { attendanceCount, lateCount, absentCount };
         } catch (error) {
             console.error("Failed to fetch attendance information:", error);
-            return { attendanceCount: 0, tardinessCount: 0, absentCount: 0 };
+            return { attendanceCount: 0, lateCount: 0, absentCount: 0 };
         }
     }
 
@@ -112,7 +112,7 @@
 
             // 出席情報を表示するHTMLを作成
             if (attendanceLink) {
-                const { attendanceCount, tardinessCount, absentCount } = await fetchAttendanceCount(attendanceLink);
+                const { attendanceCount, lateCount, absentCount } = await fetchAttendanceCount(attendanceLink);
                 // 各コースによって欠席が許される値が違うので，動的に取得できるようにする
                 // const absentDisplay = absentCount >= 4 ? "落単" : absentCount;
                 return `
@@ -122,8 +122,8 @@
                             <div style="font-size: 40px; padding-left: 20px; font-family: Arial; font-weight: bold;">${attendanceCount}</div>
                         </div>
                         <div style="flex: 1; background-color: #BBDEFB; color: #007BBB; padding: 10px; border-radius: 10px; text-align: start;">
-                            <div style="padding-left: 10px; font-family: Arial; font-weight: bold;">Tardiness</div>
-                            <div style="font-size: 40px; padding-left: 20px; font-family: Arial; font-weight: bold;">${tardinessCount} / 3</div>
+                            <div style="padding-left: 10px; font-family: Arial; font-weight: bold;">Late</div>
+                            <div style="font-size: 40px; padding-left: 20px; font-family: Arial; font-weight: bold;">${lateCount} / 3</div>
                         </div>
                     </div>
                     <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
