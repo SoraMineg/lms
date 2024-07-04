@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         LMS: Simple Dashboard
 // @namespace    http://tampermonkey.net/
-// @version      0.1
+// @version      0.2
 // @description  LMSのマイコース上に出席，遅刻，欠席が一目でわかるダッシュボードを表示します．
 // @author       nihsukah
 // @match        https://lms-tokyo.iput.ac.jp/my/courses.php
@@ -13,6 +13,7 @@
     "use strict";
     let currentlyOpenWindow = null;
 
+    // コースの詳細情報を表示するウィンドウを作成する関数
     function createWindowForCourse(course) {
         const windowDiv = document.createElement("div");
         windowDiv.style.position = "absolute";
@@ -47,6 +48,7 @@
         const viewportHeight = window.innerHeight;
         const viewportWidth = window.innerWidth;
 
+        // ウィンドウの位置を計算して設定
         windowDiv.style.top = `${rect.top + window.scrollY}px`;
         if (rect.right + 420 > viewportWidth) {
             windowDiv.style.left = `${rect.left + window.scrollX - 420}px`;
@@ -60,6 +62,7 @@
         return windowDiv;
     }
 
+    // 出席情報を取得する関数
     async function fetchAttendanceCount(attendanceLink) {
         try {
             const response = await fetch(attendanceLink);
@@ -69,10 +72,14 @@
             const attendanceCells = doc.querySelectorAll('td.statuscol.cell.c2');
 
             const attendanceCount = Array.from(attendanceCells).filter(td => td.textContent.includes("出席")).length;
-            const tardinessCount = Array.from(attendanceCells).filter(td => td.textContent.includes("遅刻")).length;
-            const absentCount = Array.from(attendanceCells).filter(td => {
+            let tardinessCount = Array.from(attendanceCells).filter(td => td.textContent.includes("遅刻")).length;
+            let absentCount = Array.from(attendanceCells).filter(td => {
                 return td.textContent.includes("欠席") && !td.textContent.includes("今後の欠席を報告する");
             }).length;
+
+            // 遅刻3回を欠席1回に換算
+            absentCount += Math.floor(tardinessCount / 3);
+            tardinessCount = tardinessCount % 3;
 
             return { attendanceCount, tardinessCount, absentCount };
         } catch (error) {
@@ -81,6 +88,7 @@
         }
     }
 
+    // コース情報を取得する関数
     async function fetchCourseInfo(courseLink) {
         try {
             const response = await fetch(courseLink);
@@ -91,6 +99,7 @@
             const attendanceDivs = doc.querySelectorAll('div.snap-assettype');
             let attendanceLink = null;
 
+            // 出席リンクを探す
             for (let div of attendanceDivs) {
                 if (div.textContent.trim() === "出欠") {
                     const modLink = div.closest('.activityinstance').querySelector('a.mod-link');
@@ -101,8 +110,11 @@
                 }
             }
 
+            // 出席情報を表示するHTMLを作成
             if (attendanceLink) {
                 const { attendanceCount, tardinessCount, absentCount } = await fetchAttendanceCount(attendanceLink);
+                // 各コースによって欠席が許される値が違うので，動的に取得できるようにする
+                // const absentDisplay = absentCount >= 4 ? "落単" : absentCount;
                 return `
                     <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px;">
                         <div style="flex: 1; background-color: #007BBB; color: white; padding: 10px; border-radius: 10px; text-align: start;">
@@ -111,7 +123,7 @@
                         </div>
                         <div style="flex: 1; background-color: #BBDEFB; color: #007BBB; padding: 10px; border-radius: 10px; text-align: start;">
                             <div style="padding-left: 10px; font-family: Arial; font-weight: bold;">Tardiness</div>
-                            <div style="font-size: 40px; padding-left: 20px; font-family: Arial; font-weight: bold;">${tardinessCount}</div>
+                            <div style="font-size: 40px; padding-left: 20px; font-family: Arial; font-weight: bold;">${tardinessCount} / 3</div>
                         </div>
                     </div>
                     <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
@@ -130,6 +142,7 @@
         }
     }
 
+    // ページロード時にコースごとにボタンを追加
     window.addEventListener("load", function() {
         setTimeout(function() {
             const courses = document.querySelectorAll(".card.dashboard-card");
